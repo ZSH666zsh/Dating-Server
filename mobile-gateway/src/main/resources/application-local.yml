@@ -1,0 +1,51 @@
+# 本地开发 profile：连接 docker-compose.local-infra.yml 起的容器名中间件
+# 容器间互访用容器名（local-postgres:5432），宿主机 IDE 调试改回 localhost:5432
+
+spring:
+  config:
+    import: ""   # 禁用远程 Nacos 配置拉取，配置全由本地 yml 提供
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: local-nacos:8848
+        namespace: dating_local
+        username: nacos
+        password: nacos
+      config:
+        server-addr: local-nacos:8848
+        namespace: dating_local
+        username: nacos
+        password: nacos
+        file-extension: yaml
+        refresh-enabled: false
+
+  datasource:
+    url: jdbc:postgresql://local-postgres:5432/dating_local?stringtype=unspecified
+    username: dating
+    password: dating123
+    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: local-redis
+      port: 6379
+      password: redis123
+      database: 1
+      timeout: 3s
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+app:
+  cache:
+    key-prefix: zhaoshihang
+
+# JWT：本地联调固定 secret，和代码里 dev 默认一致（JwtIssuer.java）
+app:
+  jwt:
+    secret: zhaoshihang-dev-jwt-secret-key-20260715-min-256bits!!
+    access-token-ttl: 900          # 15 min
+    refresh-token-ttl: 604800      # 7 days

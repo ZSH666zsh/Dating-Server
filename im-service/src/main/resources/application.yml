@@ -1,0 +1,39 @@
+server:
+  port: 18080
+
+spring:
+  application:
+    name: im-service
+  profiles:
+    active: dev
+  config:
+    import: optional:nacos:im-service-dev.yaml
+  cloud:
+    nacos:
+      config:
+        server-addr: 38.76.188.242:8848
+        namespace: dev-zhaoshihang
+        username: nacos
+        password: jianjiange
+        file-extension: yaml
+        refresh-enabled: true
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+grpc:
+  server:
+    port: 18081
+    enable-keepalive: true
+    keepalive-time: 30s
+    keepalive-timeout: 5s
+
+logging:
+  level:
+    com.dating: DEBUG

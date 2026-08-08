@@ -1,0 +1,14 @@
+# ──────────────────────────────────────────────────────
+# bootstrap.yml —— 启动引导配置（仅服务发现nacos discovery）
+# Nacos 配置已迁移到 application.yml 的 spring.config.import
+# ──────────────────────────────────────────────────────
+spring:
+  application:
+    name: post-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 38.76.188.242:8848
+        namespace: dev-zhaoshihang
+        username: nacos
+        password: jianjiange

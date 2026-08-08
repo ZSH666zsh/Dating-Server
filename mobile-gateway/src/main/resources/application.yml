@@ -1,0 +1,58 @@
+server:
+  port: 8083                                   # 与 user(8081) / post(8080) / match(8082) 错开
+
+spring:
+  application:
+    name: mobile-gateway
+  profiles:
+    active: dev
+  threads:
+    virtual:
+      enabled: true                            # JDK 21 虚拟线程
+  config:
+    import: optional:nacos:gateway-dev.yaml    # optional: 防止 Nacos 配置不存在时阻塞启动
+  cloud:
+    nacos:
+      config:
+        server-addr: 38.76.188.242:8848
+        namespace: dev-zhaoshihang
+        username: nacos
+        password: jianjiange
+        file-extension: yaml
+        refresh-enabled: true
+
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-init-sql: SET TIME ZONE 'UTC'
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    table: flyway_history_gateway
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+logging:
+  level:
+    com.dating: DEBUG
+    com.baomidou: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+app:
+  jwt:
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 7
+  sms:
+    mock-code: "123456"                        # 调试模式固定验证码

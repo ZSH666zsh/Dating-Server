@@ -1,0 +1,71 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: post-service
+  profiles:
+    active: dev
+  config:
+    import: nacos:post-service-dev.yaml  # 从 Nacos 拉远程配置（密码等敏感信息）
+  cloud:
+    nacos:
+      config:
+        server-addr: 38.76.188.242:8848
+        namespace: dev-zhaoshihang
+        username: nacos
+        password: jianjiange
+        file-extension: yaml
+        refresh-enabled: true
+
+  # 数据源占位，实际值由 application-dev.yml / Nacos 覆盖
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-init-sql: SET TIME ZONE 'UTC'
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    table: flyway_history_post
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath:mapper/*.xml
+
+# gRPC 服务器
+grpc:
+  server:
+    port: 9090
+    enable-keepalive: true
+    keepalive-time: 30s
+    keepalive-timeout: 5s
+
+# 日志 stdout，由 Promtail 采集到 Loki
+logging:
+  level:
+    com.dating: DEBUG
+    com.baomidou: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{traceId}] - %msg%n"
+
+# dating-common 对象存储（MinIO）
+dating:
+  object-storage:
+    provider: s3
+    endpoint: https://minio-api.jianjiange.site
+    region: us-east-1
+    access-key: ${MINIO_ACCESS_KEY}
+    secret-key: ${MINIO_SECRET_KEY}
+    path-style-access: true
+    bucket: dating-zhaoshihang

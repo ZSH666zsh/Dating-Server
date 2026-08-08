@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dating.post.mapper.PostLikeMapper">
+
+    <!-- 点赞 upsert（幂等，联合主键防重复）
+
+1	插入或更新了行	操作实际发生了改变（从无到有，或状态切换）
+0	幂等跳过	当前状态和请求的 status 一致（如重复点赞），没有实际变化
+
+幂等保证：重复调用相同参数不会产生副作用，status 已相等时 WHERE 条件不满足，返回 0。
+    -->
+
+
+    <insert id="upsert">
+        INSERT INTO post_likes (user_id, post_id, status, created_at, updated_at)
+        VALUES (#{userId}, #{postId}, #{status}, NOW(), NOW())
+        ON CONFLICT (user_id, post_id)
+        DO UPDATE SET status = EXCLUDED.status, updated_at = NOW()
+        WHERE post_likes.status &lt;&gt; EXCLUDED.status  -- 只有状态真正变化时才更新
+    </insert>
+
+</mapper>

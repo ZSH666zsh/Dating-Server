@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: im-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 38.76.188.242:8848
+        namespace: dev-zhaoshihang
+        username: nacos
+        password: jianjiange

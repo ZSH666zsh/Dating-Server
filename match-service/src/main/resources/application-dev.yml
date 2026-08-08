@@ -1,0 +1,24 @@
+# 连远端共享基建 38.76.188.242
+spring:
+  datasource:
+    url: jdbc:postgresql://38.76.188.242:5433/dating_dev_zhaoshihang?stringtype=unspecified
+    username: jianjian_test
+    password: ${PG_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: 38.76.188.242
+      port: 6380
+      password: ${REDIS_PASSWORD}
+      database: 1
+      timeout: 3s
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+app:
+  cache:
+    key-prefix: zhaoshihang
