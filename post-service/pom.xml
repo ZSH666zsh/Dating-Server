@@ -27,6 +27,7 @@
         <shedlock.version>5.14.0</shedlock.version>
         <caffeine.version>3.1.8</caffeine.version>
         <mapstruct.version>1.6.2</mapstruct.version>
+        <rocketmq.version>2.3.1</rocketmq.version>
     </properties>
 
     <dependencies>
@@ -178,6 +179,13 @@
             <groupId>org.redisson</groupId>
             <artifactId>redisson-spring-boot-starter</artifactId>
             <version>${redisson.version}</version>
+        </dependency>
+
+        <!-- RocketMQ：Feed 写扩散（发帖 → 关注者 timeline ZSet） -->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <version>${rocketmq.version}</version>
         </dependency>
 
         <!-- ShedLock -->

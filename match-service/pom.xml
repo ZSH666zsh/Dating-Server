@@ -162,6 +162,12 @@
             <artifactId>payment-proto</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
+        <!-- im-proto：DH 离线互动计划经 PresenceService RPC 取离线用户（不直连 im 的 Redis，符合红线 3） -->
+        <dependency>
+            <groupId>com.dating.zhaoshihang.proto</groupId>
+            <artifactId>im-proto</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
 
         <!-- Redisson -->
         <dependency>

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * // === 阶段 2：REST 过渡（违规方式，仅学习参考）。服务间禁止 RESTFUL HTTP 互调，只能用 gRPC！！！===
  * // 注意：student-dev-guide §10 红线 #3 禁止服务间 HTTP 互调！
  * // private RestTemplate restTemplate;
- * // private String userServiceUrl = "http://localhost:8081";
+ * // private String userServiceUrl = "http://localhost:8080";
  * //
  * // public boolean isMale(Long userId) {
  * //     try {
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  *
  * <h3>当前：阶段 3 — gRPC（正确方式）</h3>
  * 通过 @GrpcClient("user-service") 注入 gRPC stub，
- * 经 Nacos 服务发现连接到 user-service（端口 9091）。
+ * 经 Nacos 服务发现连接到 user-service（端口 9090）。
  * gRPC stub 由 proto/user/user.proto 编译生成，包坐标 {@code user-proto-0.1.0}。
  */
 @Slf4j

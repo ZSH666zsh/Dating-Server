@@ -1,11 +1,13 @@
 package com.dating.match.manager;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.dating.match.config.SnowflakeIdGenerator;
 import com.dating.match.entity.LikeRecord;
 import com.dating.match.mapper.LikeRecordMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -16,6 +18,7 @@ import java.util.List;
 public class LikeRecordManager {
 
     private final LikeRecordMapper likeRecordMapper;
+    private final SnowflakeIdGenerator idGenerator;
 
     /**
      * UPSERT like 记录（ON CONFLICT 更新 liked_at）。行内使用 INSERT ... ON CONFLICT 由 XML 实现。
@@ -34,6 +37,21 @@ public class LikeRecordManager {
         } else {
             likeRecordMapper.insert(record);
         }
+    }
+
+    /**
+     * 批量 UPSERT（DH 互动任务批量执行用）：一条 SQL 完成 N 条，N+1 → 1。
+     */
+    public int batchUpsert(List<LikeRecord> records) {
+        if (records == null || records.isEmpty()) return 0;
+        OffsetDateTime now = OffsetDateTime.now();
+        for (LikeRecord r : records) {
+            r.setId(idGenerator.nextId());
+            r.setCreatedAt(now);
+            r.setUpdatedAt(now);
+            r.setDeleted(0);
+        }
+        return likeRecordMapper.batchUpsert(records);
     }
 
     /**

@@ -1,5 +1,5 @@
 server:
-  port: 8082                                   # 与 user-service(8081) / post-service(8080) 错开
+  port: 8082                                   # 按 user→post→match→payment→gateway→im 顺序排
 
 spring:
   application:
@@ -43,7 +43,7 @@ mybatis-plus:
 
 grpc:
   server:
-    port: 9092                               # 与 user(9091) / post(9090) 错开
+    port: 9092
     enable-keepalive: true
     keepalive-time: 30s
     keepalive-timeout: 5s

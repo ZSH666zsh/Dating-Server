@@ -10,6 +10,6 @@ RUN mvn package -DskipTests -B
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=builder /build/target/*.jar app.jar
-EXPOSE 8083
+EXPOSE 8084
 ENV SPRING_THREADS_VIRTUAL_ENABLED=true
 ENTRYPOINT ["java", "-jar", "app.jar"]

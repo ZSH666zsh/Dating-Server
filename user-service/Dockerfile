@@ -32,8 +32,8 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 # 只从 Stage1 拷最终的 jar
 COPY --from=builder /build/target/*.jar app.jar
-# 对外端口：8081 HTTP / 9091 gRPC
-EXPOSE 8081 9091
+# 对外端口：8080 HTTP / 9090 gRPC
+EXPOSE 8080 9090
 # 时区 UTC（项目红线要求）
 ENV TZ=UTC
 # 容器启动命令

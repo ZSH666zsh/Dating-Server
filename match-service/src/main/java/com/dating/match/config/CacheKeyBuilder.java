@@ -59,4 +59,14 @@ public class CacheKeyBuilder {
     public String dhPlanLastScene(Long userId) {
         return key("dh_plan:last_scene", String.valueOf(userId));
     }
+
+    /** 互动未读计数：zhaoshihang:match:notif:unread:{userId}:{like|visit} */
+    public String notifUnread(Long userId, String type) {
+        return key("notif:unread", userId + ":" + type);
+    }
+
+    /** 互动通知列表（最近事件 ZSet）：zhaoshihang:match:notif:list:{userId} */
+    public String notifList(Long userId) {
+        return key("notif:list", String.valueOf(userId));
+    }
 }

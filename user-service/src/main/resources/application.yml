@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
   application:
@@ -43,7 +43,7 @@ mybatis-plus:
 
 grpc:
   server:
-    port: 9091                               # 与 post-service(9090) 错开
+    port: 9090                               # 序列起点：HTTP 8080 / gRPC 9090
     enable-keepalive: true
     keepalive-time: 30s
     keepalive-timeout: 5s

@@ -32,12 +32,16 @@ public class PostCommentManager {
     /**
      * 一级评论分页（游标）
      */
+
+    // DB 冷路
     public List<PostComment> listByPostId(Long postId, int pageSize, Long cursor) {
         LambdaQueryWrapper<PostComment> wrapper = new LambdaQueryWrapper<PostComment>()
                 .eq(PostComment::getPostId, postId)
                 .eq(PostComment::getRootId, 0)
                 .eq(PostComment::getDeleted, 0)
                 .orderByDesc(PostComment::getCommentId);
+
+        // 用 comment_id < cursor 降序 + LIMIT 的游标分页
         if (cursor != null && cursor > 0) {
             wrapper.lt(PostComment::getCommentId, cursor);
         }

@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@Order(1)
+@Order(1)  // 最高优先级，在所有Controller之前执行
 @RequiredArgsConstructor
 public class JwtAuthFilter implements Filter {
 

@@ -1,5 +1,5 @@
 server:
-  port: 8083                                   # 与 user(8081) / post(8080) / match(8082) 错开
+  port: 8084                                   # 网关（BFF）：HTTP 8084，无 gRPC
 
 spring:
   application:

@@ -44,6 +44,15 @@ public class DhInteractionTaskManager {
     }
 
     /**
+     * 批量删除已执行任务（配合批量执行，减少一次调度内的删除次数）。
+     */
+    public void deleteByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return;
+        taskMapper.delete(
+                new LambdaQueryWrapper<DhInteractionTask>().in(DhInteractionTask::getId, ids));
+    }
+
+    /**
      * 检查用户是否有未执行的 ONLINE 任务。
      */
     public boolean hasPendingOnlineTask(Long toUserId) {

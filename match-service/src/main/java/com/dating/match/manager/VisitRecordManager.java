@@ -1,11 +1,13 @@
 package com.dating.match.manager;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.dating.match.config.SnowflakeIdGenerator;
 import com.dating.match.entity.VisitRecord;
 import com.dating.match.mapper.VisitRecordMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -16,6 +18,7 @@ import java.util.List;
 public class VisitRecordManager {
 
     private final VisitRecordMapper visitRecordMapper;
+    private final SnowflakeIdGenerator idGenerator;
 
     /**
      * UPSERT visit 记录，累加 visit_count。
@@ -34,6 +37,22 @@ public class VisitRecordManager {
             record.setVisitCount(1);
             visitRecordMapper.insert(record);
         }
+    }
+
+    /**
+     * 批量 UPSERT（DH 互动任务批量执行用）：一条 SQL 完成 N 条。
+     */
+    public int batchUpsert(List<VisitRecord> records) {
+        if (records == null || records.isEmpty()) return 0;
+        OffsetDateTime now = OffsetDateTime.now();
+        for (VisitRecord r : records) {
+            r.setId(idGenerator.nextId());
+            r.setVisitCount(1); // 新插入为 1，冲突时由 SQL 累加
+            r.setCreatedAt(now);
+            r.setUpdatedAt(now);
+            r.setDeleted(0);
+        }
+        return visitRecordMapper.batchUpsert(records);
     }
 
     /**

@@ -89,6 +89,9 @@ public class PostWriteService {
      * 这些操作都是 best-effort：失败不回滚 DB 事务。
      */
     public void afterPostCreated(Long userId, Long postId, String content, List<String> imageKeys) {
+        // 发帖时间戳：一次性生成并随 MQ 消息下发 → 作为 timeline ZSet 的 score，重投不变（ZADD 幂等）
+        long createdAt = System.currentTimeMillis();
+
         // ── 5. 写 Redis 帖子详情缓存（HSET，TTL 7天） ──
         try {
             Map<String, String> detailMap = new HashMap<>();
@@ -121,8 +124,8 @@ public class PostWriteService {
             log.warn("Failed to add to cold start pool, postId={}", postId, e);
         }
 
-        // ── 7. @Async 写扩散给关注者（目前是桩，等 user-service 就绪） ──
-        postFanoutService.fanoutToFollowers(userId, postId);
+        // ── 7. 写扩散：MQ 异步发消息（消费端 ZADD 关注者 timeline；发送 best-effort，MQ 挂了不阻塞发帖） ──
+        postFanoutService.fanoutToFollowers(userId, postId, createdAt);
     }
 
     /**

@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * D0 冷启动实时召回服务。
+     * D0 冷启动实时召回服务。
  * 对应 match-service-prd-tech.md §4.1 D0 冷启动队列。
  *
  * <p>当用户 Feed 队列为空时触发，实时双池召回（DH + BH）并按比例 merge 后 RPUSH 到 Redis LIST。
@@ -68,27 +68,37 @@ public class ColdStartService {
     }
 
     /**
-     * DH 池召回（渐进扩范围 L0~L3）。
+     * DH 池召回（渐进扩范围 L0~L3）：先最严，样本不足逐级放宽年龄/颜值，去重累加直到 target。
      */
     private List<UserProfileProto> recallDhPool(int targetGender, List<Long> excludeIds, int target) {
-        Set<Long> seen = new HashSet<>();
+        Set<Long> seen = new HashSet<>(excludeIds); // 排除已划过用户
         List<UserProfileProto> result = new ArrayList<>();
 
-        // L0: 最严
-        result.addAll(fetchDh(targetGender, 0, 100, 0, 100, List.of(), excludeIds, target));
-        seen.addAll(result.stream().map(UserProfileProto::getUserId).toList());
-        if (result.size() >= target) return result.subList(0, target);
-
-        // L1: 放开人种
-        // (已是最宽范围，直接返回)
+        // L0 最严 → L3 全放开，逐级放宽（每级都去重累加）
+        expandDh(result, seen, targetGender, 18, 30, 80, 100, excludeIds, target); // L0：年轻 + 高颜值
+        if (result.size() >= target) return result;
+        expandDh(result, seen, targetGender, 18, 35, 60, 100, excludeIds, target); // L1：放宽颜值下限
+        if (result.size() >= target) return result;
+        expandDh(result, seen, targetGender, 18, 45, 30, 100, excludeIds, target); // L2：放宽年龄 + 颜值
+        if (result.size() >= target) return result;
+        expandDh(result, seen, targetGender, 18, 100, 0, 100, excludeIds, target); // L3：全放开兜底
         return result;
     }
 
-    private List<UserProfileProto> fetchDh(int gender, int ageMin, int ageMax,
-                                            int beautyMin, int beautyMax,
-                                            List<String> races, List<Long> excludeIds, int limit) {
-        return userClient.listDhCandidates(gender, ageMin, ageMax, beautyMin, beautyMax,
-                races, excludeIds, limit);
+    /**
+     * 拉一级 DH 候选，跳过已见用户，去重累加到 result，达到 target 即停。
+     */
+    private void expandDh(List<UserProfileProto> result, Set<Long> seen, int gender,
+                          int ageMin, int ageMax, int beautyMin, int beautyMax,
+                          List<Long> excludeIds, int target) {
+        List<UserProfileProto> batch = userClient.listDhCandidates(
+                gender, ageMin, ageMax, beautyMin, beautyMax, List.of(), excludeIds, target);
+        for (UserProfileProto p : batch) {
+            if (seen.add(p.getUserId())) {
+                result.add(p);
+                if (result.size() >= target) return;
+            }
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Like / Visit 互动记录服务。
@@ -26,6 +27,7 @@ public class LikeVisitService {
     private final VisitRecordManager visitRecordManager;
     private final UserServiceClient userClient;
     private final SnowflakeIdGenerator idGenerator;
+    private final InteractionNotificationService notificationService;
 
     /**
      * 谁 Like 了我。
@@ -39,6 +41,20 @@ public class LikeVisitService {
      */
     public List<VisitRecord> listVisitsOfMe(Long userId, int pageSize, Long cursor) {
         return visitRecordManager.listVisitsOfMe(userId, pageSize, cursor);
+    }
+
+    /**
+     * 互动未读计数（like / visit）。
+     */
+    public Map<String, Long> getUnreadCount(Long userId) {
+        return notificationService.getUnread(userId);
+    }
+
+    /**
+     * 标记互动已读（清零未读计数）。
+     */
+    public void markNotifRead(Long userId) {
+        notificationService.markRead(userId);
     }
 
     /**

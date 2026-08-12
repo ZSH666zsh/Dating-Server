@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   application:
@@ -46,7 +46,7 @@ mybatis-plus:
 # gRPC 服务器
 grpc:
   server:
-    port: 9090
+    port: 9091
     enable-keepalive: true
     keepalive-time: 30s
     keepalive-timeout: 5s
@@ -69,3 +69,23 @@ dating:
     secret-key: ${MINIO_SECRET_KEY}
     path-style-access: true
     bucket: dating-zhaoshihang
+
+# RocketMQ：Feed 写扩散（发帖 → 关注者 timeline）
+# AK/SK 为共享教学机凭据（0学员指导 §6.6），可用环境变量覆盖；
+# 消费端可用 post.fanout.enabled=false 关掉（无 RocketMQ 环境不阻塞启动）
+rocketmq:
+  name-server: ${ROCKETMQ_NAME_SERVER:38.76.188.242:9876}
+  producer:
+    group: dev_zhaoshihang_post_fanout_producer
+    access-key: ${ROCKETMQ_ACCESS_KEY:rocketmq-student}
+    secret-key: ${ROCKETMQ_SECRET_KEY:5cafa390b8a42c25}
+  consumer:
+    access-key: ${ROCKETMQ_ACCESS_KEY:rocketmq-student}
+    secret-key: ${ROCKETMQ_SECRET_KEY:5cafa390b8a42c25}
+
+post:
+  fanout:
+    enabled: true
+    topic: dev_zhaoshihang_post_fanout_v1        # 按约定先到 RocketMQ Dashboard 建 topic
+    consumer-group: dev_zhaoshihang_post_fanout_consumer
+    timeline-max: 100

@@ -1,5 +1,6 @@
 package com.dating.match.scheduler;
 
+import com.dating.match.client.PresenceGrpcClient;
 import com.dating.match.client.UserServiceClient;
 import com.dating.match.config.CacheKeyBuilder;
 import com.dating.match.config.SnowflakeIdGenerator;
@@ -36,6 +37,7 @@ public class OfflinePlanGenerator {
     private final SnowflakeIdGenerator idGenerator;
     private final CacheKeyBuilder keyBuilder;
     private final StringRedisTemplate redisTemplate;
+    private final PresenceGrpcClient presenceGrpcClient;
 
     @Scheduled(fixedDelay = 1_200_000) // 20 分钟
     public void generate() {
@@ -86,10 +88,12 @@ public class OfflinePlanGenerator {
     }
 
     /**
-     * 获取离线 BH 用户。
-     * TODO: 接入 user:online:rank ZSet 后，ZRANGEBYSCORE -inf (now-20min)
+     * 获取最近下线的 BH 用户（经 im-service PresenceService RPC，不直连其 Redis，符合红线 3）。
+     * 取最近 30 分钟内下线的用户：他们重新打开 App 时会看到"我不在时有人喜欢了我"。
+     * im-service 不可用时降级返回空 → 本次 DH 计划 no-op，不影响主流程。
      */
     private List<Long> getOfflineUserIds() {
-        return List.of();
+        long now = System.currentTimeMillis();
+        return presenceGrpcClient.getRecentOfflineUserIds(now - 30L * 60 * 1000, now, 500);
     }
 }

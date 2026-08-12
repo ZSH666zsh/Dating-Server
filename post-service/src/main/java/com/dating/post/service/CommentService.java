@@ -77,8 +77,10 @@ public class CommentService {
         // 5. Redis ZSet：最新 200 条评论窗口
         try {
             String zsetKey = cacheKeyBuilder.postComments(postId);
+            // 先ZADD落库
             redisTemplate.opsForZSet().add(zsetKey, String.valueOf(commentId), (double) commentId);
-            // 裁剪到 200 条（移除 score 最低的——即最老的评论）
+
+            // ZCARD 查长度>200？，裁剪到 200 条（移除 score 最低的——即最老的评论）
             Long size = redisTemplate.opsForZSet().zCard(zsetKey);
             if (size != null && size > COMMENT_ZSET_MAX) {
                 // 拿到最老的 (size-200) 条，逐条移除
@@ -88,6 +90,8 @@ public class CommentService {
                     redisTemplate.opsForZSet().remove(zsetKey, toRemove.toArray(new String[0]));
                 }
             }
+
+            // 设 7 天 TTL
             redisTemplate.expire(zsetKey, 7, java.util.concurrent.TimeUnit.DAYS);
         } catch (Exception e) {
             log.warn("Failed to update comment ZSet, postId={}", postId, e);
